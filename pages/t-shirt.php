@@ -117,10 +117,20 @@
             var lastProductPosition = current;
             var lastSoundTime = 0;
             var soundUnlocked = false;
+            var audioContext = null;
+            var revolverBuffer = null;
+            var revolverDecodePromise = null;
             var glideTween = null;
             var dragState = null;
-            var revolverSound = new Audio('/assets/revolver.mp3');
-            revolverSound.preload = 'auto';
+            var revolverAudioData = fetch('/assets/revolver.mp3').then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Failed to load revolver sound: HTTP ' + response.status);
+                }
+                return response.arrayBuffer();
+            }).catch(function (error) {
+                console.error(error);
+                return null;
+            });
 
             function layout() {
                 var viewportWidth = window.innerWidth;
@@ -161,16 +171,18 @@
             }
 
             function playRevolverSound(rate) {
-                if (!soundUnlocked) {
+                if (!soundUnlocked || !audioContext || !revolverBuffer) {
                     return;
                 }
 
-                var sound = revolverSound.cloneNode();
-                sound.playbackRate = rate;
-                sound.volume = 0.65;
-                sound.play().catch(function (error) {
-                    console.error('Unable to play the carousel sound:', error);
-                });
+                var source = audioContext.createBufferSource();
+                var volume = audioContext.createGain();
+                source.buffer = revolverBuffer;
+                source.playbackRate.value = rate;
+                volume.gain.value = 0.65;
+                source.connect(volume);
+                volume.connect(audioContext.destination);
+                source.start();
             }
 
             function render() {
@@ -249,10 +261,40 @@
                 }
             });
 
-            ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(function (eventName) {
-                window.addEventListener(eventName, function () {
+            function unlockRevolverSound() {
+                if (!audioContext) {
+                    var AudioContextConstructor = window.AudioContext;
+                    if (!AudioContextConstructor) {
+                        console.error('Web Audio is not supported in this browser.');
+                        return;
+                    }
+                    audioContext = new AudioContextConstructor();
+                }
+
+                audioContext.resume().then(function () {
                     soundUnlocked = true;
-                }, { once: true, passive: true });
+                }).catch(function (error) {
+                    console.error('Unable to unlock carousel audio:', error);
+                });
+
+                if (!revolverBuffer && !revolverDecodePromise) {
+                    revolverDecodePromise = revolverAudioData.then(function (audioData) {
+                        if (!audioData) {
+                            return;
+                        }
+                        return audioContext.decodeAudioData(audioData.slice(0));
+                    }).then(function (buffer) {
+                        if (buffer) {
+                            revolverBuffer = buffer;
+                        }
+                    }).catch(function (error) {
+                        console.error('Unable to decode carousel audio:', error);
+                    });
+                }
+            }
+
+            ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(function (eventName) {
+                window.addEventListener(eventName, unlockRevolverSound, { once: true, passive: true });
             });
 
             gsap.ticker.add(function (time, deltaTime) {
