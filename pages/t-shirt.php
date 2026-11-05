@@ -114,7 +114,13 @@
             var target = count;
             var lastDrawn = null;
             var lastIndex = -1;
+            var lastProductPosition = current;
+            var lastSoundTime = 0;
+            var soundUnlocked = false;
             var glideTween = null;
+            var dragState = null;
+            var revolverSound = new Audio('/assets/revolver.mp3');
+            revolverSound.preload = 'auto';
 
             function layout() {
                 var viewportWidth = window.innerWidth;
@@ -134,7 +140,7 @@
                 if (viewportWidth <= 515) {
                     radius = Math.max(radius, (cardWidth + 12) / (step * Math.PI / 180));
                 }
-                notch = Math.max(320, viewportHeight * 0.5);
+                notch = Math.max(320, viewportHeight * 0.5) / 3;
                 stage.style.setProperty('--t-shirt-card-width', cardWidth + 'px');
                 stage.style.setProperty('--t-shirt-card-height', cardHeight + 'px');
             }
@@ -152,6 +158,19 @@
                 description.textContent = products[index].description;
                 addButton.textContent = 'Add to Cart';
                 buyButton.textContent = 'Buy Now';
+            }
+
+            function playRevolverSound(rate) {
+                if (!soundUnlocked) {
+                    return;
+                }
+
+                var sound = revolverSound.cloneNode();
+                sound.playbackRate = rate;
+                sound.volume = 0.65;
+                sound.play().catch(function (error) {
+                    console.error('Unable to play the carousel sound:', error);
+                });
             }
 
             function render() {
@@ -187,9 +206,20 @@
 
                 var productIndex = ((nearest % count) + count) % count;
                 if (productIndex !== lastIndex) {
+                    var stepsCrossed = Math.abs(nearest - lastProductPosition);
+                    if (soundUnlocked && stepsCrossed > 0) {
+                        var now = performance.now();
+                        var interval = (now - lastSoundTime) / stepsCrossed;
+                        var playbackRate = clamp(0.7 + 400 / interval, 0.75, 2.2);
+                        for (var soundStep = 0; soundStep < stepsCrossed; soundStep += 1) {
+                            playRevolverSound(playbackRate);
+                        }
+                        lastSoundTime = now;
+                    }
                     lastIndex = productIndex;
                     setProduct(productIndex);
                 }
+                lastProductPosition = nearest;
             }
 
             layout();
@@ -219,6 +249,12 @@
                 }
             });
 
+            ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(function (eventName) {
+                window.addEventListener(eventName, function () {
+                    soundUnlocked = true;
+                }, { once: true, passive: true });
+            });
+
             gsap.ticker.add(function (time, deltaTime) {
                 var easing = reducedMotion ? 1 : 1 - Math.pow(1 - 0.12, deltaTime / 16.67);
                 current += (target - current) * easing;
@@ -231,7 +267,7 @@
                 }
             });
 
-            function glide(distance, duration) {
+            function glide(distance, duration, ease, onComplete) {
                 if (glideTween) {
                     glideTween.kill();
                 }
@@ -241,29 +277,95 @@
                 glideTween = gsap.to(progress, {
                     value: distance,
                     duration: reducedMotion ? 0.01 : duration,
-                    ease: 'power2.inOut',
+                    ease: ease || 'power2.inOut',
                     onUpdate: function () {
                         var movement = progress.value - previous;
                         previous = progress.value;
                         window.scrollBy(0, movement);
+                    },
+                    onComplete: function () {
+                        glideTween = null;
+                        if (onComplete) {
+                            onComplete();
+                        }
                     }
                 });
             }
 
             ['wheel', 'touchstart'].forEach(function (eventName) {
                 window.addEventListener(eventName, function () {
-                    if (glideTween) {
-                        glideTween.kill();
-                    }
+                if (glideTween) {
+                    glideTween.kill();
+                    glideTween = null;
+                }
                 }, { passive: true });
             });
 
-            ScrollTrigger.addEventListener('scrollEnd', function () {
+            function snapToNearest() {
+                if (dragState) {
+                    return;
+                }
+
                 var progress = (scrollTrigger.scroll() - scrollTrigger.start) / notch;
                 var nearest = Math.round(progress);
                 if (Math.abs(progress - nearest) * notch > 2) {
-                    glide((nearest - progress) * notch, 0.45);
+                    glide((nearest - progress) * notch, 0.5);
                 }
+            }
+
+            ring.addEventListener('pointerdown', function (event) {
+                if (event.button !== 0 || event.target.closest('.t-shirt-info')) {
+                    return;
+                }
+
+                if (glideTween) {
+                    glideTween.kill();
+                    glideTween = null;
+                }
+                dragState = {
+                    pointerId: event.pointerId,
+                    lastX: event.clientX,
+                    startX: event.clientX,
+                    moved: false
+                };
+                ring.classList.add('is-dragging');
+                ring.setPointerCapture(event.pointerId);
+            });
+
+            ring.addEventListener('pointermove', function (event) {
+                if (!dragState || event.pointerId !== dragState.pointerId) {
+                    return;
+                }
+
+                var deltaX = dragState.lastX - event.clientX;
+                if (!dragState.moved && Math.abs(event.clientX - dragState.startX) > 4) {
+                    dragState.moved = true;
+                }
+                dragState.lastX = event.clientX;
+
+                if (dragState.moved) {
+                    var dragUnit = cardWidth + (window.innerWidth <= 515 ? 12 : 0);
+                    var scrollDelta = deltaX * notch * 3 / dragUnit;
+                    window.scrollBy(0, scrollDelta);
+                }
+            });
+
+            function finishDrag(event) {
+                if (!dragState || (event && event.pointerId !== dragState.pointerId)) {
+                    return;
+                }
+
+                dragState = null;
+                ring.classList.remove('is-dragging');
+                snapToNearest();
+            }
+
+            ring.addEventListener('pointerup', finishDrag);
+            ring.addEventListener('pointercancel', finishDrag);
+            ring.addEventListener('lostpointercapture', finishDrag);
+
+            ScrollTrigger.addEventListener('scrollEnd', function () {
+                snapToNearest();
             });
 
             addButton.addEventListener('click', function () {
@@ -288,6 +390,7 @@
             parkAt(count);
             current = target = count;
             render();
+            lastSoundTime = performance.now();
 
             var resizeTimeout;
             window.addEventListener('resize', function () {

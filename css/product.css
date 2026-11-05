@@ -86,6 +86,13 @@
     flex: none;
     /* margin-top: clamp(28px, 7vh, 80px); */
     margin-top: 24px;
+    cursor: grab;
+    touch-action: pan-y;
+}
+
+.t-shirt-ring.is-dragging{
+    cursor: grabbing;
+    user-select: none;
 }
 
 .t-shirt-card{
