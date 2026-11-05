@@ -1,0 +1,356 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Stupid Monk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Space+Grotesk:wght@500&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: one pinned stage. 25 cards ride a shared arc, each pivoting on its own bottom-centre.
+   Single light look by choice (a white storefront), so no dark blocks; every colour is a token. */
+:root {
+  --paper: #fafaf8;
+  --card: #ffffff;
+  --ink: #101010;
+  --mute: #6b6b67;
+  --line: #b4b4af;
+  --shadow: 0 1px 2px rgba(16,16,16,.04), 0 14px 40px rgba(16,16,16,.07);
+  --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Space Mono', ui-monospace, Menlo, Consolas, monospace;
+  --cw: 300px;
+  --ch: 378px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--mono); margin: 0; }
+
+.stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: clamp(28px, 6vh, 64px) 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--paper);
+}
+.brand { margin: 0; font: 400 clamp(40px, 3.6vw, 62px)/1 var(--display); letter-spacing: -.01em; text-align: center; }
+.section { margin: clamp(28px, 7vh, 80px) 0 0; font: 400 clamp(22px, 1.7vw, 28px)/1 var(--display); text-align: center; }
+.count { margin: 8px 0 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); font-variant-numeric: tabular-nums; }
+
+.ring { position: relative; width: 100%; height: var(--ch); margin-top: clamp(18px, 3.5vh, 34px); flex: none; }
+.card {
+  position: absolute; left: 50%; top: 0;
+  width: var(--cw); height: var(--ch); margin-left: calc(var(--cw) / -2);
+  display: grid; place-items: center;
+  padding: 0; border: 0; background: var(--card); box-shadow: var(--shadow);
+  transform-origin: 50% 100%;
+  cursor: pointer; will-change: transform;
+  visibility: hidden;
+}
+.card img { width: 76%; height: auto; display: block; pointer-events: none; -webkit-user-drag: none; user-select: none; }
+.card:focus-visible, .info button:focus-visible, .info select:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.info {
+  position: absolute; left: 50%; top: calc(var(--ch) + 24px);
+  width: min(var(--cw), 100%); text-align: center; z-index: 500;
+  transform: translateX(-50%);
+}
+.info h3 { margin: 0 0 6px; font: 500 clamp(18px, 1.3vw, 22px)/1.1 var(--sans); }
+.info p { margin: 0; font-size: 12px; line-height: 1.4; color: var(--ink); text-wrap: balance; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; }
+.row.end { justify-content: flex-end; margin-top: 6px; }
+.size { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.size label { text-decoration: underline; text-underline-offset: 3px; }
+.info select, .info button {
+  font: 400 12px/1.2 var(--mono); color: var(--ink); background: transparent;
+  border: 1px solid var(--line); border-radius: 0; padding: 3px 8px; cursor: pointer;
+}
+.info button:hover, .info button:active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.hint {
+  position: absolute; left: 0; right: 0; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  text-align: center; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--mute);
+}
+
+@media (max-width: 759px) {
+  .info { top: calc(var(--ch) + 34px); }
+  .info p { font-size: 12px; }
+}
+</style>
+
+<main class="stage" id="stage">
+  <h1 class="brand">Stupid Monk</h1>
+  <h2 class="section">T-shirts</h2>
+  <p class="count">No. <span id="num">01</span> of 25</p>
+
+  <div class="ring" id="ring">
+    <div class="info" id="info">
+      <h3 id="pname">Numb</h3>
+      <p id="pdesc"></p>
+      <div class="row">
+        <div class="size"><label for="psize">Size</label>
+          <select id="psize">
+            <option>S</option><option>M</option><option>L</option><option>XL</option><option selected>XXL</option>
+          </select>
+        </div>
+        <button type="button" id="add">Add to Cart</button>
+      </div>
+      <div class="row end"><button type="button" id="buy">Buy Now</button></div>
+    </div>
+  </div>
+
+  <div class="hint">Scroll to browse</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<script>
+(function () {
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+  try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+  var N = 25;            // products
+  var LAPS = 3;          // scroll runway is 3 laps; we always sit in the middle one
+  var DIR = 1;           // 1: scrolling down brings the next product in from the right. -1 mirrors it.
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // name, base colour, print colour, graphic, wordmark
+  var P = [
+    ['Numb', '#141414', '#f4f4f0', 'word', 'numb.'],
+    ['Hollow Hour', '#1b1b1c', '#9fb08a', 'ghost'],
+    ['Static Prayer', '#2a2b2d', '#e8e8e4', 'grid'],
+    ['Ash Wednesday', '#a9a9a5', '#1a1a1a', 'circle'],
+    ['Slow Burn', '#8a3b22', '#f2e6d4', 'stripe'],
+    ['Bell Jar', '#e4dfd2', '#1a1a1a', 'circle'],
+    ['Night Shift', '#1c2540', '#e9d8a6', 'star'],
+    ['Paper Moon', '#f1f0ec', '#1a1a1a', 'circle'],
+    ['Dust Tape', '#c9b28d', '#2a2118', 'stripe'],
+    ['Low Tide', '#46607a', '#e9eef2', 'blob'],
+    ['Kiln', '#b4562f', '#f6e8da', 'blob'],
+    ['Salt Road', '#fbfbf9', '#1a1a1a', 'stripe'],
+    ['Dead Air', '#101010', '#f4f4f0', 'word', 'dead air'],
+    ['Marigold', '#d5a021', '#1a1a1a', 'blob'],
+    ['Understudy', '#59603a', '#ecebd9', 'ghost'],
+    ['Cold Open', '#c8d8e4', '#142230', 'word', 'cold open'],
+    ['Third Rail', '#161616', '#d8402e', 'stripe'],
+    ['Moth', '#4a3426', '#e9dcc6', 'star'],
+    ['Lantern', '#2b2b2b', '#f0c85a', 'circle'],
+    ['Fever Dream', '#5c1f2b', '#f3d4d0', 'blob'],
+    ['Gravel', '#8d8b85', '#161616', 'grid'],
+    ['Offcut', '#1f3a2c', '#e8efe4', 'word', 'offcut'],
+    ['Tin Roof', '#b9bcbd', '#161616', 'stripe'],
+    ['Evening Mass', '#111111', '#f1f1ed', 'ghost'],
+    ['Last Call', '#141414', '#f4f4f0', 'word', 'last call']
+  ];
+  var FITS = ['Oversized boxy fit', 'Relaxed fit, dropped shoulders', 'Oversized with a cropped hem', 'Boxy fit, heavy rib collar'];
+  var GSM = [220, 240, 260];
+  var PRINTS = ['Screen printed in small runs.', 'Water-based ink, hand pulled.', 'Puff print on the chest.', 'Garment dyed, then printed.'];
+  function describe(i) { return FITS[i % 4] + '. ' + GSM[i % 3] + ' GSM combed cotton. ' + PRINTS[(i * 3) % 4]; }
+
+  // ---- placeholder product art (swap for real photos in WordPress) ----
+  function graphic(p) {
+    var ink = p[2], base = p[1], g = p[3], s = '';
+    if (g === 'word') {
+      var t = p[4], fs = t.length <= 5 ? 40 : t.length <= 8 ? 30 : 25;
+      s = '<text x="150" y="' + (160 + fs / 3) + '" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-weight="800" font-size="' + fs + '" letter-spacing="-1" fill="' + ink + '">' + t + '</text>';
+    } else if (g === 'circle') {
+      s = '<circle cx="136" cy="168" r="34" fill="' + ink + '"/><circle cx="168" cy="168" r="34" fill="none" stroke="' + ink + '" stroke-width="3"/>';
+    } else if (g === 'stripe') {
+      s = '<rect x="102" y="140" width="96" height="9" fill="' + ink + '"/><rect x="102" y="160" width="96" height="9" fill="' + ink + '"/><rect x="102" y="180" width="60" height="9" fill="' + ink + '"/>';
+    } else if (g === 'star') {
+      s = '<polygon points="150,128 161,156 192,158 168,177 176,207 150,190 124,207 132,177 108,158 139,156" fill="' + ink + '"/>';
+    } else if (g === 'grid') {
+      for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) s += '<circle cx="' + (114 + c * 24) + '" cy="' + (138 + r * 24) + '" r="4" fill="' + ink + '"/>';
+    } else if (g === 'blob') {
+      s = '<path d="M104 170 Q106 128 150 132 Q196 136 192 176 Q188 214 146 208 Q100 204 104 170 Z" fill="' + ink + '"/>';
+    } else if (g === 'ghost') {
+      s = '<path d="M120 216 L120 152 Q120 118 150 118 Q180 118 180 152 L180 216 L168 205 L156 216 L144 205 L132 216 Z" fill="' + ink + '"/><circle cx="140" cy="154" r="4.5" fill="' + base + '"/><circle cx="160" cy="154" r="4.5" fill="' + base + '"/>';
+    }
+    return s;
+  }
+  function tee(p) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 340">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient></defs>' +
+      '<path d="M112 34 Q150 58 188 34 L240 54 L294 108 L262 148 L234 124 L234 304 Q150 316 66 304 L66 124 L38 148 L6 108 L60 54 Z" fill="' + p[1] + '"/>' +
+      '<path d="M112 34 Q150 58 188 34 L240 54 L294 108 L262 148 L234 124 L234 304 Q150 316 66 304 L66 124 L38 148 L6 108 L60 54 Z" fill="url(#g)"/>' +
+      '<path d="M60 54 L66 124 M240 54 L234 124" stroke="#000" stroke-opacity=".16" stroke-width="1.5" fill="none"/>' +
+      '<path d="M110 33 Q150 70 190 33" fill="none" stroke="#000" stroke-opacity=".28" stroke-width="7" stroke-linecap="round"/>' +
+      graphic(p) + '</svg>';
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // ---- build cards ----
+  var stage = document.getElementById('stage');
+  var ring = document.getElementById('ring');
+  var info = document.getElementById('info');
+  var cards = P.map(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'card';
+    b.setAttribute('aria-label', p[0]);
+    b.tabIndex = -1;
+    var im = new Image();
+    im.alt = p[0] + ' T-shirt';
+    im.draggable = false;
+    im.src = tee(p);
+    b.appendChild(im);
+    b.addEventListener('click', function () {
+      var off = wrap(i - cur);
+      if (Math.abs(off) > 0.5) glide(off * notch, 0.7);
+    });
+    ring.insertBefore(b, info);
+    return b;
+  });
+
+  // ---- layout ----
+  var cw, ch, R, STEP, notch;
+  function layout() {
+    var vw = window.innerWidth, vh = window.innerHeight, mobile = vw < 760;
+    cw = mobile ? Math.min(vw * 0.58, 280) : Math.min(vw * 0.175, 340);
+    cw = Math.max(170, Math.min(cw, (vh - (mobile ? 380 : 470)) / 1.26));
+    ch = cw * 1.26;
+    STEP = mobile ? 27 : 20;           // degrees between neighbours
+    R = mobile ? vw * 0.95 : vw * 0.635; // arc radius, measured at each card's bottom-centre
+    notch = Math.max(320, vh * 0.5);   // scroll pixels per product
+    stage.style.setProperty('--cw', cw + 'px');
+    stage.style.setProperty('--ch', ch + 'px');
+  }
+  layout();
+
+  // ---- state ----
+  var cur = N, target = N, lastDrawn = null, lastIdx = -1;
+  function wrap(v) { return ((v + N / 2) % N + N) % N - N / 2; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  var elName = document.getElementById('pname');
+  var elDesc = document.getElementById('pdesc');
+  var elNum = document.getElementById('num');
+
+  function setProduct(idx) {
+    elName.textContent = P[idx][0];
+    elDesc.textContent = describe(idx);
+    elNum.textContent = String(idx + 1).padStart(2, '0');
+    cards.forEach(function (c, i) { c.tabIndex = i === idx ? 0 : -1; });
+    addBtn.textContent = 'Add to Cart';
+  }
+
+  function render() {
+    for (var i = 0; i < N; i++) {
+      var off = wrap(i - cur);
+      var a = Math.abs(off);
+      var card = cards[i];
+      if (a > 2.1) { if (card.style.visibility !== 'hidden') card.style.visibility = 'hidden'; continue; }
+      var th = off * STEP * DIR;
+      var rad = th * Math.PI / 180;
+      var op = a <= 1 ? 1 : clamp(1 - (a - 1) / 0.95, 0, 1);
+      gsap.set(card, {
+        x: R * Math.sin(rad),
+        y: R * (1 - Math.cos(rad)),
+        rotation: th,
+        transformOrigin: '50% 100%',
+        opacity: op,
+        visibility: op > 0.01 ? 'visible' : 'hidden',
+        zIndex: Math.round(100 - a * 10)
+      });
+    }
+    var near = Math.round(cur);
+    var d = Math.abs(cur - near);
+    var o = clamp(1 - (d - 0.03) / 0.17, 0, 1);
+    info.style.opacity = o;
+    info.style.visibility = o < 0.02 ? 'hidden' : 'visible';
+    info.style.pointerEvents = o > 0.6 ? 'auto' : 'none';
+    info.style.transform = 'translate(-50%,' + ((1 - o) * 10).toFixed(1) + 'px)';
+    var idx = ((near % N) + N) % N;
+    if (idx !== lastIdx) { lastIdx = idx; setProduct(idx); }
+  }
+
+  // ---- scroll drives `target`; the ticker eases `cur` toward it ----
+  var st = ScrollTrigger.create({
+    trigger: stage,
+    start: 'top top',
+    end: function () { return '+=' + (N * LAPS * notch); },
+    pin: true,
+    invalidateOnRefresh: true,
+    onUpdate: function (self) {
+      var p = (self.scroll() - self.start) / notch;
+      var k = Math.floor(p / N);
+      if (k !== 1) {                       // left the middle lap: jump one or two laps. Looks identical, so it reads as endless.
+        var shift = (1 - k) * N;
+        self.scroll(self.start + (p + shift) * notch);
+        cur += shift; target += shift; p += shift;
+      }
+      target = p;
+    }
+  });
+
+  gsap.ticker.add(function (time, dt) {
+    var k = reduced ? 1 : 1 - Math.pow(1 - 0.12, dt / 16.67);
+    cur += (target - cur) * k;
+    if (Math.abs(target - cur) < 0.0004) cur = target;
+    if (cur !== lastDrawn) { lastDrawn = cur; render(); }
+  });
+
+  // ---- glide helper (relative, so a lap jump mid-tween cannot fight it) ----
+  var glideTween = null;
+  function glide(delta, dur) {
+    if (glideTween) glideTween.kill();
+    var o = { v: 0 }, last = 0;
+    glideTween = gsap.to(o, {
+      v: delta, duration: reduced ? 0.01 : dur, ease: 'power2.inOut',
+      onUpdate: function () { var d = o.v - last; last = o.v; window.scrollBy(0, d); }
+    });
+  }
+  ['wheel', 'touchstart'].forEach(function (ev) {
+    window.addEventListener(ev, function () { if (glideTween) glideTween.kill(); }, { passive: true });
+  });
+
+  // settle on the nearest product when scrolling stops
+  ScrollTrigger.addEventListener('scrollEnd', function () {
+    var p = (st.scroll() - st.start) / notch;
+    var t = Math.round(p);
+    if (Math.abs(p - t) * notch > 2) glide((t - p) * notch, 0.45);
+  });
+
+  window.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'SELECT') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); glide(notch * DIR, 0.6); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); glide(-notch * DIR, 0.6); }
+  });
+
+  // ---- buttons ----
+  var addBtn = document.getElementById('add');
+  var buyBtn = document.getElementById('buy');
+  addBtn.addEventListener('click', function () {
+    addBtn.textContent = 'Added';
+    setTimeout(function () { addBtn.textContent = 'Add to Cart'; }, 1400);
+  });
+  buyBtn.addEventListener('click', function () {
+    buyBtn.textContent = 'Demo only';
+    setTimeout(function () { buyBtn.textContent = 'Buy Now'; }, 1400);
+  });
+
+  // ---- start on product 1, in the middle lap ----
+  function parkAt(p) { window.scrollTo(0, st.start + p * notch); }
+  ScrollTrigger.refresh();
+  parkAt(N);
+  cur = target = N;
+  render();
+
+  var t;
+  window.addEventListener('resize', function () {
+    clearTimeout(t);
+    t = setTimeout(function () {
+      var keep = target;
+      layout();
+      ScrollTrigger.refresh();
+      parkAt(keep);
+      lastDrawn = null;
+    }, 150);
+  });
+})();
+</script>
+
+</body></html>

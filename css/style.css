@@ -1,0 +1,64 @@
+@import url("product.css");
+
+:root{
+    box-sizing: border-box;
+    
+}
+
+/* variables */
+
+:root{
+    --Primary-font: noto-serif-devanagari-excond, sans-serif;
+    --secondary-font: "space-mono", mono;
+}
+
+
+/* Nav */
+
+.nav{
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+}
+
+
+/* Home */
+
+.main-container{
+    display: flex;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 80vh;
+    gap: 16px;
+    /* background-color: #ff09ad; */
+}
+
+.click-svg{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+    transform: scale(0);
+}
+
+.click-svg img{
+    display: block;
+}
+
+.home-pg-btn{
+    font-family: var(--Primary-font);
+    font-size: 50px;
+    font-weight: 200;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+}

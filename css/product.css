@@ -1,0 +1,225 @@
+/* T-shirt product page */
+.t-shirt-page{
+    font-family: var(--Primary-font);
+    margin: 0;
+    background: #fafaf8;
+}
+
+.t-shrt-h1{
+    text-align: center;
+    font-weight: 200;
+    font-size: 24px;
+    line-height: 110%;
+}
+
+.t-shirts-container{
+    display: flex;
+    gap: 56px;
+    justify-content: center;
+}
+
+.product-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--secondary-font);
+}
+
+.product-img{
+    padding: 88px 56px;
+    background: white;
+    filter: drop-shadow(12px 10px 15px #00000038);
+}
+
+.product-img img{
+    max-width: 195px;
+}
+
+.product-dscrptn{
+    text-align: center;
+}
+
+.product-tittle{
+    font-size: 20px;
+    padding: 20px 0 12px 0;
+    display: block;
+}
+
+.product-info{
+    line-height: 110%;
+    font-size: 12px;
+    max-width: 40ch;
+    margin: 0;
+    margin-bottom: 12px;
+}
+
+/* Scroll-driven T-shirt carousel */
+.t-shirt-stage{
+    position: relative;
+    box-sizing: border-box;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(28px, 6vh, 64px) 16px 24px;
+    background: #fafaf8;
+    color: #101010;
+}
+
+.t-shirt-page .t-shirt-stage{
+    padding-top: clamp(90px, 12vh, 120px);
+}
+
+.t-shirt-stage .t-shrt-h1{
+    margin: 0;
+    font: 400 clamp(40px, 3.6vw, 62px)/1 Georgia, ;
+    text-align: center;
+}
+
+.t-shirt-ring{
+    position: relative;
+    width: 100%;
+    height: var(--t-shirt-card-height, 378px);
+    flex: none;
+    /* margin-top: clamp(28px, 7vh, 80px); */
+    margin-top: 24px;
+}
+
+.t-shirt-card{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: var(--t-shirt-card-width, 300px);
+    height: var(--t-shirt-card-height, 378px);
+    margin-left: calc(var(--t-shirt-card-width, 300px) / -2);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(16, 16, 16, .04), 0 14px 40px rgba(16, 16, 16, .07);
+    transform-origin: 50% 100%;
+    visibility: hidden;
+    will-change: transform;
+}
+
+.t-shirt-card img{
+    display: block;
+    width: 76%;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.t-shirt-info{
+    position: absolute;
+    top: calc(var(--t-shirt-card-height, 378px) + 24px);
+    left: 50%;
+    z-index: 10;
+    width: min(var(--t-shirt-card-width, 300px), 100%);
+    text-align: center;
+}
+
+.t-shirt-info .product-tittle{
+    margin: 0 0 6px;
+    padding: 0;
+    font-family: var(--secondary-font);
+    font-size: 20px;
+    line-height: 1.1;
+}
+
+.t-shirt-info .product-info{
+    max-width: none;
+    margin: 0;
+    color: #101010;
+    font-family: var(--secondary-font);
+    font-size: 12px;
+    line-height: 1.4;
+    text-wrap: balance;
+}
+
+.t-shirt-controls{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.t-shirt-controls-end{
+    justify-content: flex-end;
+    margin-top: 6px;
+}
+
+.t-shirt-size{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--secondary-font);
+    font-size: 12px;
+}
+
+.t-shirt-size span{
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.t-shirt-action,
+.t-shirt-size select{
+    padding: 3px 8px;
+    border: 1px solid #b4b4af;
+    border-radius: 0;
+    background: transparent;
+    color: #101010;
+    font: 400 12px/1.2 var(--secondary-font);
+    cursor: pointer;
+}
+
+.t-shirt-size select{
+    appearance: none;
+}
+
+.t-shirt-action:hover,
+.t-shirt-action:active{
+    border-color: #101010;
+    background: #101010;
+    color: #fafaf8;
+}
+
+.t-shirt-action:focus-visible,
+.t-shirt-size select:focus-visible{
+    outline: 2px solid #101010;
+    outline-offset: 3px;
+}
+
+.t-shirt-hint{
+    position: absolute;
+    right: -40px;
+    bottom: 72px;
+    /* left: 0; */
+    rotate: 90deg;
+    /* writing-mode: vertical-rl; */
+    /* text-orientation: mixed; */
+    margin: 0;
+    color: #00000086;
+    font-family: var(--secondary-font);
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-align: center;
+    /* text-transform: uppercase; */
+}
+
+@media (max-width: 759px){
+    .t-shirt-info{
+        top: calc(var(--t-shirt-card-height, 378px) + 34px);
+        width: min(280px, calc(100vw - 32px));
+    }
+
+    .t-shirt-info .product-info{
+        font-size: 12px;
+    }
+}

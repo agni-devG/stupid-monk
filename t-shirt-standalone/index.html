@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Stupid Monk — T-shirts</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="scroll-track" id="scroll-track">
+        <main class="stage" id="stage">
+            <header class="page-header">
+                <img class="brand" src="assets/Logo.svg" alt="Stupid Monk">
+                <h1>T-shirts</h1>
+            </header>
+
+            <div class="ring" id="ring" aria-label="T-shirt products">
+                <article class="card is-current">
+                    <img src="assets/t-shirt-imgs/Numb.png" alt="Numb T-shirt" draggable="false">
+                </article>
+                <article class="card">
+                    <img src="assets/t-shirt-imgs/T-shirt-2.png" alt="T-shirt design 2" draggable="false">
+                </article>
+                <article class="card">
+                    <img src="assets/t-shirt-imgs/T-shirt-3.png" alt="T-shirt design 3" draggable="false">
+                </article>
+
+                <section class="info" id="info" aria-live="polite">
+                    <h2 id="product-name">Numb</h2>
+                    <p id="product-description">Lorem ipsum dolor sit amet consectetur. Pellentesque orci imperdiet velit nisl amet iaculis quam sollicitudin. Et vehicula.</p>
+                    <div class="controls">
+                        <label class="size" for="product-size">
+                            <span>Size</span>
+                            <select id="product-size" name="size">
+                                <option>S</option>
+                                <option>M</option>
+                                <option>L</option>
+                                <option>XL</option>
+                                <option selected>XXL</option>
+                            </select>
+                        </label>
+                        <button class="action" type="button" id="add-button">Add to Cart</button>
+                    </div>
+                    <div class="controls controls-end">
+                        <button class="action" type="button" id="buy-button">Buy Now</button>
+                    </div>
+                </section>
+            </div>
+
+            <p class="hint">Scroll to browse</p>
+        </main>
+    </div>
+</body>
+</html>
