@@ -131,6 +131,9 @@
                 cardHeight = cardWidth * 1.26;
                 step = mobile ? 27 : 20;
                 radius = mobile ? viewportWidth * 0.95 : viewportWidth * 0.635;
+                if (viewportWidth <= 515) {
+                    radius = Math.max(radius, (cardWidth + 12) / (step * Math.PI / 180));
+                }
                 notch = Math.max(320, viewportHeight * 0.5);
                 stage.style.setProperty('--t-shirt-card-width', cardWidth + 'px');
                 stage.style.setProperty('--t-shirt-card-height', cardHeight + 'px');

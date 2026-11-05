@@ -214,10 +214,6 @@
 }
 
 @media (max-width: 759px){
-    .t-shirts-container{
-        gap: 12px;
-    }
-
     .t-shirt-info{
         top: calc(var(--t-shirt-card-height, 378px) + 34px);
         width: min(280px, calc(100vw - 32px));
